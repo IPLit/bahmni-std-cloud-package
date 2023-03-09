@@ -1,14 +1,15 @@
 version: "3.7"
 services:
+
   proxy:
     image: bahmniindiadistro/proxy:${PROXY_IMAGE_TAG:?}
     volumes:
     #   - ${CERTIFICATE_PATH}:/etc/tls
     - "bahmni-patient-images:/home/bahmni/patient_images"
-
     ports:
       - "80:80"
       - "443:443"
+
   bahmni-config:
     image: '${CONFIG_IMAGE_NAME:?}:${CONFIG_IMAGE_TAG:?}'
     volumes:
@@ -85,7 +86,7 @@ services:
   db:
     container_name: db
     image: postgres:${POSTGRES_IMAGE_TAG:?}
-    profiles: ["abdm"]
+    profiles: ["abdm", "emr"]
     environment:
       - POSTGRES_USER=${HIP_DB_USER:?}
       - POSTGRES_PASSWORD=${HIP_DB_PASSWORD:?}
@@ -96,13 +97,13 @@ services:
       - postgresql_data:/var/lib/postgresql/data
   rabbitmq:
       image: rabbitmq:${RABBITMQ_IMAGE_TAG:?}
-      profiles: ["abdm"]
+      profiles: ["abdm", "emr"]
       container_name: rabbitmq
       ports:
         - "5672:5672"
   otp:
       image: bahmniindiadistro/otp-service:${OTP_SERVICE_IMAGE_TAG:?}
-      profiles: ["abdm"]
+      profiles: ["abdm", "emr"]
       container_name: otp
       depends_on:
         - db
@@ -112,7 +113,7 @@ services:
 
   hiu-db-setup:
       image: bahmniindiadistro/hiu-db:${HIU_DB_INITIALIZER_IMAGE_TAG:?}
-      profiles: ["abdm"]
+      profiles: ["abdm", "emr"]
       container_name: hiu-db-setup
       environment:
         - 'JAVA_TOOL_OPTIONS=-Djdbc.url=${HIU_DB_URL:?} -Djdbc.username=${HIU_DB_USER:?} -Djdbc.password=${HIU_DB_PASSWORD:?} -Djdbc.database=${HIU_DB_NAME:?}'
@@ -120,7 +121,7 @@ services:
   hip:
     container_name: hip
     image: bahmniindiadistro/hip:${HIP_IMAGE_TAG:?}
-    profiles: ["abdm"]
+    profiles: ["abdm", "emr"]
     ports:
       - "8000:80"
     depends_on:
@@ -147,7 +148,7 @@ services:
 
   hiu:
     image: bahmniindiadistro/hiu:${HIU_IMAGE_TAG:?}
-    profiles: ["abdm"]
+    profiles: ["abdm", "emr"]
     container_name: hiu
     environment:
       HIU_ID: ${HIU_ID:?}
@@ -187,7 +188,7 @@ services:
 
   hiu-ui:
     image: bahmniindiadistro/hiu-ui:${HIU_UI_IMAGE_TAG:?}
-    profiles: ["abdm"]
+    profiles: ["abdm", "emr"]
     container_name: hiu-ui
     environment:
       BACKEND_BASE_URL: ${HIU_BACKEND_BASE_URL:?}
@@ -200,7 +201,7 @@ services:
   hip-atomfeed-listener:
     container_name: hip-atomfeed-listener
     image: bahmniindiadistro/hip-atomfeed:${HIP_ATOMFEED_IMAGE_TAG:?}
-    profiles: ["abdm"]
+    profiles: ["abdm", "emr"]
     environment:
       DATABASE_URL: ${HIP_ATOMFEED_DB_URL:?}
       DATABASE_NAME: ${HIP_ATOMFEED_DB_NAME:?}
@@ -217,7 +218,7 @@ services:
 
   reports:
     image: bahmni/reports:${REPORTS_IMAGE_TAG:?}
-    profiles: [ "reports" ]
+    profiles: [ "reports", "emr" ]
     environment:
       OPENMRS_DB_HOST: ${OPENMRS_DB_HOST:?}
       OPENMRS_DB_NAME: ${OPENMRS_DB_NAME:?}
@@ -242,7 +243,7 @@ services:
 
   reportsdb:
     image: mysql:5.6
-    profiles: ["reports"]
+    profiles: ["reports", "emr"]
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?}
       MYSQL_DATABASE: ${REPORTS_DB_NAME:?}
@@ -275,7 +276,7 @@ services:
 
   abha-verification:
     image: bahmniindiadistro/abha-verification:${ABHA_VERIFICATION_IMAGE_TAG:?}
-    profiles: ["abdm"]
+    profiles: ["abdm", "emr"]
 
 volumes:
   openmrs-data:
